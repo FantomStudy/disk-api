@@ -35,7 +35,8 @@ class AuthController extends Controller
             'message' => "Login failed",
         ], 401);
     }
-    public function logout(){
+    public function logout()
+    {
         Auth::user()->currentAccessToken()->delete();
         return response()->json([
             "success" => true,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
@@ -68,6 +69,7 @@ class FileController extends Controller
                 "message" => "Success",
                 "name" => $notOrigName,
                 "author" => $fileModel->user,
+                "size" => $fileModel->size,
                 "url" => $fileModel->url,
                 "file_id" => $fileModel->file_id,
             ];
@@ -108,6 +110,12 @@ class FileController extends Controller
         );
     }
     public function delete(File $file){
+        $filePath = $file->path;
+
+        if (Storage::disk('public')->exists($filePath)) {
+            Storage::disk('public')->delete($filePath);
+        }
+
         $file->delete();
         return response()->json([
             "success" => true,

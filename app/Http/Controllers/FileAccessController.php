@@ -16,22 +16,14 @@ class FileAccessController extends Controller
     public function showMyAccess()
     {
         $data = [];
-        $authorFile = File::query()->where('user_id', Auth::id())->get();
         $relations = FileAccess::query()->where('user_id', Auth::id())->get();
 
-        foreach ($authorFile as $file) {
-            $data [] = [
-              'file_id' => $file->id,
-              'name' => $file->name,
-                'type' => 'author',
-              'url' => $file->url,
-            ];
-        }
         foreach ($relations as $relation) {
             $data [] = [
-                'file_id' => $relation->file_id,
+                'file_id' => $relation->file->file_id,
                 'name' => $relation->file->name,
-                'type' => 'co-author',
+                'size' => $relation->file->size,
+                'author' => $relation->file->user->email,
                 'url' => route('download', $relation->file),
             ];
         }
@@ -53,7 +45,27 @@ class FileAccessController extends Controller
                     'user_id' => $user->id,
                 ]);
             }
+
+            if ($exist) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User already have access to this file',
+                ], 400);
+            }
+            if ($user->id == $file->user_id){
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You can not give access to yourself',
+                ],400);
+            }
         }
+        if(!$user){
+            return response()->json([
+                "message" =>"User not found",
+                "access" => $file->getAccessArray(),
+            ], 404);
+        }
+
         return response()->json($file->getAccessArray(), 201);
     }
 
@@ -71,6 +83,6 @@ class FileAccessController extends Controller
           }
             FileAccess::query()->where('user_id', $user->id)->where('file_id', $file->id)->delete();
         }
-        return response()->json($file->getAccessArray(), 204);
+        return response()->json($file->getAccessArray(), 200);
     }
 }
