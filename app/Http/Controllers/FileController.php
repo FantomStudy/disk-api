@@ -21,7 +21,7 @@ class FileController extends Controller
             $extension = $file->getClientOriginalExtension();
             $fileId = substr(uniqid(), 2, 13);
 
-            if ($file->getSize() > 1024*1024*2){
+            if ($file->getSize() > 1024*1024*5){
                 $data [] = [
                     "success" => false,
                     "message" => "File size too large. Max file size is 2 MB",
